@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+		<meta charset="utf-8">
+        <title>Mapa de nodos y enlaces - Red (...)</title>
+
+        
+		<!-- En caso de hacer accesible este archivo a intranet, es mejor no usar CDNs afuera -->
+        <!-- Es preferible manejar un CDN interno para alojar todas las librerias comunes (ej, jquery) (?) o varios CDN descentralizados -->
+        <link rel="stylesheet" href="static/leaflet.css" />
+        <script src="static/leaflet.js"></script>
+        <script src="static/jquery-1.11.3.min.js"></script>
+
+		<!-- temporal -->
+        <link href='https://fonts.googleapis.com/css?family=Raleway:400,700' rel='stylesheet' type='text/css'>
+        <script src='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.standalone.js'></script>
+		<link href='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css' rel='stylesheet' />
+
+
+        <style>
+        body {padding: 0; margin: 0; text-align: center;font-family: 'Raleway', sans-serif;}
+        h1 { font-family: 'Raleway', Arial, serif; font-weight: 700; }
+		    .cmap { height: 500px; }
+        </style>
+  </head>
+
+  <body>
+  		<div style="width: 60%; margin: 0 auto;">
+			<h2>Mapa básico (Leaflet.js+OSM)</h2>
+			<p>
+				100% libre y funciona en redes aisladas (exceptuando tiles).<br />
+				Se le puede especificar los datos en un archivo JS, pero es preferible utilizar archivos GeoJSON para transmitirle los datos.<br />
+				<a href="features.json">Archivo de datos GeoJSON</a>
+			</p>
+	        <div id="map" class="cmap"></div>
+	        <h2>Mapbox (Mapbox*+Mapbox.js+Leaflet.js+OSM)</h2>
+	        <p>
+	        	Requiere Internet.<br />
+	        	El mismo mapa de arriba, pero con tiles diferentes. Mapbox viene con un editor (manual) que exporta GeoJSON, formato admitido por Leaflet.js.<br />
+	        	Tiene características interesantes como el otorgar estilos a los puntos y a las líneas. Portar.
+	        </p>
+	        <div id="map3" class="cmap"></div>
+
+        </div>
+        <script type ="text/javascript">
+        var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+		var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+        var basemap = L.tileLayer(osmUrl,{minZoom: 8, maxZoom: 18, attribution: osmAttrib});
+
+        $.getJSON('features.json', function(data) {
+                var geojson = L.geoJson(data, {
+                  style: function(feature) {
+                      switch (feature.properties.role) {
+                          case 'backbone': return {color: "#ff0000"};
+                          case 'node': return {color: "#0000ff"};
+                          case 'client': return {color: "#0000ff"};
+                      }
+                  },
+                  onEachFeature: function (feature, layer) {
+                  		//Leer titulo y descripción de GeoJSON
+                        layer.bindPopup('<strong>'+feature.properties.title + '</strong><br />'
+                                                        + feature.properties.description);
+
+                  }
+                });
+        var map = L.map('map').setView([-16.521, -68.1], 12); //Vista por defecto
+        basemap.addTo(map);
+        geojson.addTo(map);
+        });
+        
+
+        L.mapbox.accessToken = 'pk.eyJ1IjoibWF2ZXJpY2twIiwiYSI6ImNpZXc2cnE3bTB6ZTFzcG0yc3B4dno3amMifQ.IQMFhdUYlNuSQDzm7-a_ZQ';
+        var map3 = L.mapbox.map('map3', 'maverickp.ciew6rpnk10gwt6m3x5fttekd').setView([-16.521, -68.1], 12);
+
+  </script>
+ </body>
+</html>
